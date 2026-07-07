@@ -1,0 +1,62 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "bte": "https://w3id.org/battery-twin-envelope#",
+    "schema": "https://schema.org/",
+    "battinfo": "https://w3id.org/battinfo/",
+
+    "TwinEnvelope": "bte:TwinEnvelope",
+    "bte_version": "bte:specVersion",
+
+    "identity": "bte:identity",
+    "label": "schema:name",
+    "manufacturer": "schema:manufacturer",
+    "model": "schema:model",
+    "serial_number": "schema:serialNumber",
+    "battinfo_iri": {"@id": "bte:battinfoRecord", "@type": "@id"},
+    "passport_id": "bte:passportIdentifier",
+
+    "specification": "bte:specification",
+    "battinfo_record": {"@id": "bte:battinfoRecord", "@type": "@id"},
+    "chemistry": "bte:chemistry",
+    "form_factor": "bte:formFactor",
+    "nominal_capacity_ah": "bte:nominalCapacityAmpereHour",
+    "nominal_voltage_volt": "bte:nominalVoltageVolt",
+
+    "models": "bte:modelBinding",
+    "kind": "bte:kind",
+    "name": "schema:name",
+    "source": {"@id": "bte:source", "@type": "@id"},
+    "inline": {"@id": "bte:inlineDocument", "@type": "@json"},
+    "solver_hint": "bte:solverHint",
+    "validity": "bte:validityWindow",
+    "temperature_celsius": "bte:temperatureWindowCelsius",
+
+    "state": "bte:state",
+    "state_history": "bte:stateHistory",
+    "as_of": {"@id": "bte:asOf", "@type": "schema:DateTime"},
+    "state_of_charge": "bte:stateOfCharge",
+    "state_of_health": "bte:stateOfHealth",
+    "cycle_count": "bte:cycleCount",
+    "internal_resistance_ohm": "bte:internalResistanceOhm",
+    "method": "bte:estimationMethod",
+    "source_data": {"@id": "bte:sourceData", "@type": "@id"},
+
+    "data": "bte:dataLink",
+    "uri": {"@id": "bte:uri", "@type": "@id"},
+    "role": "bte:role",
+    "description": "schema:description",
+
+    "provenance": "bte:provenance",
+    "created": {"@id": "schema:dateCreated", "@type": "schema:DateTime"},
+    "created_by": "schema:creator",
+    "tool": "bte:tool",
+    "funding": "schema:funding",
+
+    "version": "bte:version",
+    "number": "bte:versionNumber",
+    "previous": "bte:previousVersionHash",
+    "changed": "bte:changedSections",
+    "timestamp": {"@id": "bte:versionTimestamp", "@type": "schema:DateTime"}
+  }
+}

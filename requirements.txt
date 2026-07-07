@@ -1,5 +1,1 @@
--e .[dev,bdf,viz]
-
-# Local-only dependencies (optional).
--e ../cold
--e ../gleaned
+-e .[dev]

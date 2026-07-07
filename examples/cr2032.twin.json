@@ -1,0 +1,60 @@
+{
+  "bte_version": "0.1.0",
+  "id": "urn:bte:energizer-cr2032:demo-001",
+  "identity": {
+    "label": "Energizer CR2032 (bench cell 001)",
+    "manufacturer": "Energizer",
+    "model": "CR2032",
+    "serial_number": "DEMO-001",
+    "battinfo_iri": "https://w3id.org/battinfo/cell/demo-001"
+  },
+  "specification": {
+    "battinfo_record": "https://w3id.org/battinfo/cell-spec/energizer-cr2032",
+    "chemistry": "Li/MnO2",
+    "form_factor": "coin_cr2032",
+    "nominal_capacity_ah": 0.235,
+    "nominal_voltage_volt": 3.0
+  },
+  "models": [
+    {
+      "kind": "custom",
+      "name": "ocv-bezier-fit",
+      "inline": {
+        "description": "Placeholder OCV curve fit; replace with a BPX binding for rechargeable chemistries.",
+        "curve": "bezier",
+        "control_points": [[0.0, 3.35], [0.4, 3.0], [0.8, 2.7], [1.0, 2.0]]
+      },
+      "validity": {
+        "temperature_celsius": [10.0, 40.0],
+        "state_of_charge": [0.05, 1.0]
+      }
+    }
+  ],
+  "state": {
+    "as_of": "2026-07-07T12:00:00Z",
+    "state_of_charge": 0.82,
+    "state_of_health": 1.0,
+    "cycle_count": 0,
+    "method": "coulomb_counting",
+    "source_data": "data/SINTEF__DEMO-001__20260707_001.bdf.csv"
+  },
+  "data": [
+    {
+      "kind": "bdf",
+      "uri": "data/SINTEF__DEMO-001__20260707_001.bdf.csv",
+      "role": "characterization",
+      "description": "Constant-load discharge segment collected with gleaned."
+    }
+  ],
+  "provenance": {
+    "created": "2026-07-07T12:00:00Z",
+    "created_by": "Simon Clark",
+    "tool": "echoed/0.2.0",
+    "funding": "EU grant agreement 101103997 (DigiBatt)"
+  },
+  "version": {
+    "number": 1,
+    "changed": [],
+    "timestamp": "2026-07-07T12:00:00Z"
+  }
+}

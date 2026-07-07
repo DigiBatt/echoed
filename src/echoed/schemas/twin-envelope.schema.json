@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/DigiBatt/echoed/main/src/echoed/schemas/twin-envelope.schema.json",
+  "title": "Battery Twin Envelope",
+  "description": "BTE v0.1: an immutable, exchangeable document composing identity, specification, models, state, and data links of a battery digital twin.",
+  "type": "object",
+  "required": ["bte_version", "id", "identity", "provenance", "version"],
+  "additionalProperties": false,
+  "properties": {
+    "bte_version": {"type": "string", "pattern": "^0\\.1\\.[0-9]+$"},
+    "id": {"type": "string", "minLength": 1},
+    "identity": {"$ref": "#/$defs/identity"},
+    "specification": {"$ref": "#/$defs/specification"},
+    "models": {"type": "array", "items": {"$ref": "#/$defs/modelBinding"}},
+    "state": {"$ref": "#/$defs/stateSnapshot"},
+    "state_history": {"type": "array", "items": {"$ref": "#/$defs/stateSnapshot"}},
+    "data": {"type": "array", "items": {"$ref": "#/$defs/dataLink"}},
+    "provenance": {"$ref": "#/$defs/provenance"},
+    "version": {"$ref": "#/$defs/versionInfo"}
+  },
+  "$defs": {
+    "identity": {
+      "type": "object",
+      "required": ["label"],
+      "additionalProperties": false,
+      "properties": {
+        "label": {"type": "string", "minLength": 1},
+        "manufacturer": {"type": "string"},
+        "model": {"type": "string"},
+        "serial_number": {"type": "string"},
+        "battinfo_iri": {"type": "string", "format": "uri"},
+        "passport_id": {"type": "string"}
+      }
+    },
+    "specification": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "battinfo_record": {"type": "string"},
+        "chemistry": {"type": "string"},
+        "form_factor": {"type": "string"},
+        "nominal_capacity_ah": {"type": "number", "minimum": 0},
+        "nominal_voltage_volt": {"type": "number", "minimum": 0}
+      }
+    },
+    "window": {
+      "type": "array",
+      "items": {"type": "number"},
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "validityWindow": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "temperature_celsius": {"$ref": "#/$defs/window"},
+        "state_of_charge": {"$ref": "#/$defs/window"}
+      }
+    },
+    "modelBinding": {
+      "type": "object",
+      "required": ["kind", "name"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"enum": ["bpx", "battmo", "pybamm", "custom"]},
+        "name": {"type": "string", "minLength": 1},
+        "source": {"type": "string"},
+        "inline": {"type": "object"},
+        "solver_hint": {"type": "string"},
+        "validity": {"$ref": "#/$defs/validityWindow"}
+      },
+      "oneOf": [
+        {"required": ["source"], "not": {"required": ["inline"]}},
+        {"required": ["inline"], "not": {"required": ["source"]}}
+      ]
+    },
+    "stateSnapshot": {
+      "type": "object",
+      "required": ["as_of"],
+      "additionalProperties": false,
+      "properties": {
+        "as_of": {"type": "string", "format": "date-time"},
+        "state_of_charge": {"type": "number", "minimum": 0, "maximum": 1},
+        "state_of_health": {"type": "number", "minimum": 0, "maximum": 1.5},
+        "cycle_count": {"type": "integer", "minimum": 0},
+        "internal_resistance_ohm": {"type": "number", "minimum": 0},
+        "method": {"type": "string"},
+        "source_data": {"type": "string"}
+      }
+    },
+    "dataLink": {
+      "type": "object",
+      "required": ["kind", "uri"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {"enum": ["bdf", "feed", "other"]},
+        "uri": {"type": "string", "minLength": 1},
+        "role": {"type": "string"},
+        "description": {"type": "string"}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["created"],
+      "additionalProperties": false,
+      "properties": {
+        "created": {"type": "string", "format": "date-time"},
+        "created_by": {"type": "string"},
+        "tool": {"type": "string"},
+        "funding": {"type": "string"}
+      }
+    },
+    "versionInfo": {
+      "type": "object",
+      "required": ["number", "timestamp"],
+      "additionalProperties": false,
+      "properties": {
+        "number": {"type": "integer", "minimum": 1},
+        "previous": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "changed": {"type": "array", "items": {"type": "string"}},
+        "timestamp": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}
