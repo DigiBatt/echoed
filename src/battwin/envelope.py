@@ -226,7 +226,7 @@ class TwinEnvelope(_Section):
         return TwinEnvelope.model_validate(data)
 
     def summary(self) -> str:
-        """One-paragraph human summary (used by ``echoed show``)."""
+        """One-paragraph human summary (used by ``battwin show``)."""
         lines = [
             f"{self.identity.label} (id: {self.id})",
             f"  BTE {self.bte_version} | version {self.version.number}"
@@ -274,14 +274,14 @@ def new_envelope(
     created_by: str | None = None,
     timestamp: datetime | None = None,
 ) -> TwinEnvelope:
-    """Scaffold a minimal valid envelope (used by ``echoed init``)."""
+    """Scaffold a minimal valid envelope (used by ``battwin init``)."""
     now = timestamp or datetime.now(timezone.utc)
     slug = "".join(c if c.isalnum() else "-" for c in label.lower()).strip("-")
     return TwinEnvelope(
         id=twin_id or f"urn:bte:{slug}:{date.today().isoformat()}",
         identity=Identity(label=label),
         specification=Specification(chemistry=chemistry) if chemistry else None,
-        provenance=Provenance(created=now, created_by=created_by, tool=f"echoed/{_version()}"),
+        provenance=Provenance(created=now, created_by=created_by, tool=f"battwin/{_version()}"),
         version=VersionInfo(timestamp=now),
     )
 
@@ -290,6 +290,6 @@ def _version() -> str:
     try:
         from importlib.metadata import version
 
-        return version("echoed")
+        return version("battwin")
     except Exception:  # pragma: no cover - metadata absent in odd environments
-        return "0.2.0"
+        return "0.3.0"

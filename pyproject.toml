@@ -3,8 +3,8 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "echoed"
-version = "0.2.0"
+name = "battwin"
+version = "0.3.0"
 description = "Battery Twin Envelope (BTE): an open specification and reference SDK for expressing and exchanging battery digital twins"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.10"
@@ -12,7 +12,7 @@ license = {file = "LICENSE"}
 authors = [
   {name = "Simon Clark"},
 ]
-keywords = ["battery", "digital-twin", "battery-passport", "linked-data", "bdf", "battinfo", "bpx"]
+keywords = ["battery", "digital-twin", "battery-passport", "linked-data", "bdf", "battinfo", "bpx", "battwin"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
@@ -38,7 +38,7 @@ dev = [
 ]
 
 [project.scripts]
-echoed = "echoed.cli:main"
+battwin = "battwin.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/DigiBatt/echoed"
@@ -49,7 +49,7 @@ Issues = "https://github.com/DigiBatt/echoed/issues"
 where = ["src"]
 
 [tool.setuptools.package-data]
-echoed = ["schemas/*.json", "context/*.jsonld", "py.typed"]
+battwin = ["schemas/*.json", "context/*.jsonld", "py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

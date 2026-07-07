@@ -4,7 +4,30 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog and this project follows Semantic Versioning.
 
-## [0.2.0] - 2026-07-07
+## [0.3.0] - 2026-07-08
+
+Renamed from `echoed` to **battwin**. The **Battery Twin Envelope (BTE)**
+format name is unchanged, as is its namespace `https://w3id.org/battinfo/twin#`
+(BattINFO remains the IRI authority), the `bte:` JSON-LD prefix, the `urn:bte:`
+id scheme, and the `.twin.json` suffix — a package name is not a format name
+(cf. `batterydf` ≠ BDF). Renaming also unblocks PyPI publication: `echoed` was
+squatted by an unrelated project, whereas `battwin` is free.
+
+> Note: the `gleaned` collector package referenced in the older entries below
+> is today's **battfeed** (renamed in the same round).
+
+### Changed (breaking)
+
+- Import package, console script, and PyPI distribution are now `battwin`
+  (`import echoed` no longer exists). The packaged JSON Schema / JSON-LD context
+  resource paths move from `echoed/…` to `battwin/…` accordingly.
+
+### Removed
+
+- Legacy pre-BTE harvester outputs `assets/data/battery_data.{csv,json,parquet}`
+  (2024-era artifacts a spec package should not ship).
+
+## [0.2.0] - 2026-07-07 (as echoed)
 
 Complete refocus: echoed is now the **Battery Twin Envelope (BTE)**
 specification and reference SDK. The earlier framework skeleton

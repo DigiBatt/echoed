@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from echoed import (
+from battwin import (
     ModelBinding,
     StateSnapshot,
     TwinEnvelope,

@@ -2,9 +2,9 @@
 
 Two layers, matching the spec:
 
-1. **JSON Schema** (``echoed/schemas/twin-envelope.schema.json``) — the public,
+1. **JSON Schema** (``battwin/schemas/twin-envelope.schema.json``) — the public,
    language-neutral contract. Anyone can validate an envelope without Python.
-2. **Model rules** (pydantic, :mod:`echoed.envelope`) — the reference
+2. **Model rules** (pydantic, :mod:`battwin.envelope`) — the reference
    implementation's stricter semantic checks (e.g. a model binding must have
    exactly one of ``source``/``inline``).
 
@@ -32,14 +32,14 @@ CONTEXT_RESOURCE = "twin-envelope.context.jsonld"
 @lru_cache(maxsize=1)
 def load_schema() -> dict[str, Any]:
     """Return the packaged BTE JSON Schema."""
-    text = resources.files("echoed").joinpath("schemas", SCHEMA_RESOURCE).read_text("utf-8")
+    text = resources.files("battwin").joinpath("schemas", SCHEMA_RESOURCE).read_text("utf-8")
     return json.loads(text)
 
 
 @lru_cache(maxsize=1)
 def load_context() -> dict[str, Any]:
     """Return the packaged BTE JSON-LD context (the value of ``@context``)."""
-    text = resources.files("echoed").joinpath("context", CONTEXT_RESOURCE).read_text("utf-8")
+    text = resources.files("battwin").joinpath("context", CONTEXT_RESOURCE).read_text("utf-8")
     return json.loads(text)["@context"]
 
 

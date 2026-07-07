@@ -1,4 +1,4 @@
-"""echoed — Battery Twin Envelope (BTE) specification and reference SDK.
+"""battwin — Battery Twin Envelope (BTE) specification and reference SDK.
 
 A battery digital twin, expressed as an immutable, exchangeable document that
 composes open artifacts by reference: BattINFO records (identity/spec), BPX
@@ -27,9 +27,9 @@ from .validate import load_context, load_schema, validate_dict, validate_file
 try:
     from importlib.metadata import version as _pkg_version
 
-    __version__ = _pkg_version("echoed")
+    __version__ = _pkg_version("battwin")
 except Exception:  # pragma: no cover
-    __version__ = "0.2.0"
+    __version__ = "0.3.0"
 
 __all__ = [
     "BTE_VERSION",

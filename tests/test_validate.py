@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from echoed import load, load_context, load_schema, validate_dict, validate_file
+from battwin import load, load_context, load_schema, validate_dict, validate_file
 
 EXAMPLE = Path(__file__).resolve().parent.parent / "examples" / "cr2032.twin.json"
 

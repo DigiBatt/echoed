@@ -1,4 +1,4 @@
-"""``echoed`` command-line interface.
+"""``battwin`` command-line interface.
 
 Small by design: validate, show, init, diff, hash. Anything that *runs* a
 twin (simulation, sync, hosting) is intentionally out of scope — see SPEC.md.
@@ -76,10 +76,10 @@ def _cmd_diff(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="echoed",
+        prog="battwin",
         description="Battery Twin Envelope (BTE): validate, inspect, and scaffold twin documents.",
     )
-    parser.add_argument("--version", action="version", version=f"echoed {__version__}")
+    parser.add_argument("--version", action="version", version=f"battwin {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("validate", help="validate envelope files against the BTE spec")

@@ -4,8 +4,8 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
-from echoed import StateSnapshot, load, save
-from echoed.cli import main
+from battwin import StateSnapshot, load, save
+from battwin.cli import main
 
 EXAMPLE = Path(__file__).resolve().parent.parent / "examples" / "cr2032.twin.json"
 

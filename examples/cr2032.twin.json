@@ -43,13 +43,13 @@
       "kind": "bdf",
       "uri": "data/SINTEF__DEMO-001__20260707_001.bdf.csv",
       "role": "characterization",
-      "description": "Constant-load discharge segment collected with gleaned."
+      "description": "Constant-load discharge segment collected with battfeed."
     }
   ],
   "provenance": {
     "created": "2026-07-07T12:00:00Z",
     "created_by": "Simon Clark",
-    "tool": "echoed/0.2.0",
+    "tool": "battwin/0.3.0",
     "funding": "EU grant agreement 101103997 (DigiBatt)"
   },
   "version": {

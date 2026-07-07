@@ -126,12 +126,12 @@ production twin platforms; BTE standardizes the *shape*, not the platform.)
 ## 5. Validation and conformance
 
 A document conforms to BTE v0.1 if it validates against the JSON Schema
-published with this spec (`echoed/schemas/twin-envelope.schema.json`) **and**
+published with this spec (`battwin/schemas/twin-envelope.schema.json`) **and**
 satisfies the semantic rules above (one-of `source`/`inline`; ordered
 windows; version-chain rules when a predecessor is available).
 
-The reference SDK (`pip install echoed`) implements both layers:
-`echoed validate <file>`.
+The reference SDK (`pip install battwin`) implements both layers:
+`battwin validate <file>`.
 
 ## 6. JSON-LD rendering
 
@@ -164,7 +164,7 @@ BTE v0.1 intentionally does **not** specify:
 - executing simulations (that is the job of PyBaMM, BattMo, and platforms);
 - hosting, APIs, or synchronization protocols for live twins;
 - fleet/tenant management;
-- acquisition of measurement data (see the `gleaned` collector toolkit and
+- acquisition of measurement data (see the `battfeed` collector toolkit and
   the BDF ecosystem);
 - replacing BattINFO records, BPX files, or BDF datasets — it links them.
 
