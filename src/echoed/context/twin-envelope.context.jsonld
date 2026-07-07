@@ -1,7 +1,7 @@
 {
   "@context": {
     "@version": 1.1,
-    "bte": "https://w3id.org/battery-twin-envelope#",
+    "bte": "https://w3id.org/battinfo/twin#",
     "schema": "https://schema.org/",
     "battinfo": "https://w3id.org/battinfo/",
 

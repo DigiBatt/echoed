@@ -137,11 +137,25 @@ The reference SDK (`pip install echoed`) implements both layers:
 
 Adding `"@context"` (the context published with this spec), `"@id"` (= `id`)
 and `"@type": "TwinEnvelope"` to a conforming document yields JSON-LD, mapping
-identity fields to schema.org and domain terms to the `bte:` namespace, with
-BattINFO IRIs as first-class references. The `bte:` namespace IRI
-(`https://w3id.org/battery-twin-envelope#`) is **pending registration**;
-until registered, treat term IRIs as provisional. Deeper EMMO alignment
-(quantities, units) is planned for v0.2 in coordination with BattINFO.
+identity fields to schema.org and domain terms to the `bte:` prefix, with
+BattINFO IRIs as first-class references.
+
+BTE deliberately introduces **no new namespace**: BattINFO
+(`https://w3id.org/battinfo`, a registered w3id namespace) is the authority
+for battery-related IRIs, and BTE terms live under it:
+
+- vocabulary terms: `https://w3id.org/battinfo/twin#` (the `bte:` prefix),
+  e.g. `bte:stateOfHealth` = `https://w3id.org/battinfo/twin#stateOfHealth`;
+- twin *instances*, when registered, follow the BattINFO registry resource
+  pattern: `https://w3id.org/battinfo/twin/{id}`;
+- a hosted context is planned at `https://w3id.org/battinfo/twin/context`
+  (mirroring the existing `https://w3id.org/battinfo/context/records/v1.json`
+  convention), so envelopes can reference the context by URL instead of
+  inlining it.
+
+Until the `/twin` redirect rules are added to the battinfo w3id registration,
+treat term IRIs as provisional. Deeper EMMO alignment (quantities, units) is
+planned for v0.2 in coordination with BattINFO.
 
 ## 7. Non-goals
 

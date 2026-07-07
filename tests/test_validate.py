@@ -20,7 +20,8 @@ def test_schema_and_context_are_packaged() -> None:
     schema = load_schema()
     assert schema["title"] == "Battery Twin Envelope"
     context = load_context()
-    assert context["bte"].startswith("https://")
+    # BTE introduces no namespace of its own: BattINFO is the IRI authority.
+    assert context["bte"] == "https://w3id.org/battinfo/twin#"
 
 
 def test_missing_identity_reported() -> None:
