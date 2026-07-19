@@ -1,5 +1,5 @@
 {
-  "bte_version": "0.1.0",
+  "bte_version": "0.1.1",
   "id": "urn:bte:energizer-cr2032:demo-001",
   "identity": {
     "label": "Energizer CR2032 (bench cell 001)",
@@ -35,6 +35,7 @@
     "state_of_charge": 0.82,
     "state_of_health": 1.0,
     "cycle_count": 0,
+    "energy_throughput_kwh": 0.00013,
     "method": "coulomb_counting",
     "source_data": "data/SINTEF__DEMO-001__20260707_001.bdf.csv"
   },
@@ -51,6 +52,9 @@
     "created_by": "Simon Clark",
     "tool": "battwin/0.3.0",
     "funding": "EU grant agreement 101103997 (DigiBatt)"
+  },
+  "extensions": {
+    "lab:fixture_id": "bench-07"
   },
   "version": {
     "number": 1,

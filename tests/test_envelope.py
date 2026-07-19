@@ -1,6 +1,7 @@
-"""Envelope model behavior: construction, hashing, version chain."""
+"""Envelope model behavior: construction, hashing, version chain,
+canonical datetime form, and immutability."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -97,3 +98,57 @@ def test_unknown_top_level_field_rejected() -> None:
     doc["surprise"] = True
     with pytest.raises(ValidationError):
         TwinEnvelope.model_validate(doc)
+
+
+@pytest.mark.parametrize(
+    ("dt", "expected"),
+    [
+        (datetime(2026, 7, 8, 12, 0, 0, tzinfo=timezone.utc), "2026-07-08T12:00:00Z"),
+        (datetime(2026, 7, 8, 12, 0, 0, 500000, tzinfo=timezone.utc), "2026-07-08T12:00:00.5Z"),
+        (
+            datetime(2026, 7, 8, 12, 0, 0, 123456, tzinfo=timezone.utc),
+            "2026-07-08T12:00:00.123456Z",
+        ),
+        (
+            datetime(2026, 7, 8, 14, 30, 0, tzinfo=timezone(timedelta(hours=2))),
+            "2026-07-08T12:30:00Z",
+        ),
+        (datetime(2026, 7, 8, 12, 0, 0), "2026-07-08T12:00:00Z"),  # naive == UTC
+    ],
+)
+def test_canonical_datetime_form(dt: datetime, expected: str) -> None:
+    """SPEC §4: RFC 3339 UTC 'Z', no trailing fractional zeros, offsets normalized."""
+    assert StateSnapshot(as_of=dt).model_dump(mode="json")["as_of"] == expected
+
+
+@pytest.mark.parametrize(
+    "dt",
+    [
+        datetime(2026, 7, 8, 12, 0, 0, tzinfo=timezone.utc),
+        datetime(2026, 7, 8, 12, 0, 0, 500000, tzinfo=timezone.utc),
+        datetime(2026, 7, 8, 12, 0, 0, 123456, tzinfo=timezone.utc),
+        datetime(2026, 7, 8, 14, 30, 0, tzinfo=timezone(timedelta(hours=2))),
+    ],
+)
+def test_save_load_is_a_canonical_fixed_point(dt: datetime, tmp_path: Path) -> None:
+    """load(save(env)) yields byte-identical canonical_json and content_hash."""
+    env = new_envelope(label="fixed point", timestamp=dt).next_version(
+        timestamp=dt, state=StateSnapshot(as_of=dt)
+    )
+    out = tmp_path / "fp.twin.json"
+    save(env, out)
+    reloaded = load(out)
+    assert reloaded.canonical_json() == env.canonical_json()
+    assert reloaded.content_hash() == env.content_hash()
+    assert "+02:00" not in env.canonical_json()  # offsets are normalized to Z
+
+
+def test_envelope_and_sections_are_frozen() -> None:
+    env = load(EXAMPLE)
+    with pytest.raises(ValidationError):
+        env.id = "urn:bte:other"  # type: ignore[misc]
+    with pytest.raises(ValidationError):
+        env.identity.label = "changed"  # type: ignore[misc]
+    assert env.state is not None
+    with pytest.raises(ValidationError):
+        env.state.state_of_charge = 0.1  # type: ignore[misc]

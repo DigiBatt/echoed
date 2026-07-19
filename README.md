@@ -70,17 +70,21 @@ battwin diff cell.twin.json cell.v2.twin.json   # checks the version chain
 
 ```jsonc
 {
-  "bte_version": "0.1.0",
+  "bte_version": "0.1.1",
   "id": "urn:bte:energizer-cr2032:demo-001",
   "identity":      { "label": "...", "serial_number": "...", "battinfo_iri": "...", "passport_id": "..." },
   "specification": { "battinfo_record": "https://w3id.org/battinfo/cell-spec/...", "chemistry": "Li/MnO2" },
   "models":        [ { "kind": "bpx", "name": "...", "source": "params.bpx.json", "validity": { "...": "..." } } ],
-  "state":         { "as_of": "2026-07-07T12:00:00Z", "state_of_charge": 0.82, "method": "coulomb_counting" },
+  "state":         { "as_of": "2026-07-07T12:00:00Z", "state_of_charge": 0.82, "energy_throughput_kwh": 0.00013, "method": "coulomb_counting" },
   "data":          [ { "kind": "bdf", "uri": "data/SINTEF__DEMO-001__20260707_001.bdf.csv", "role": "cycling" } ],
   "provenance":    { "created": "...", "created_by": "...", "tool": "battwin/0.3.0" },
+  "extensions":    { "lab:fixture_id": "bench-07" },
   "version":       { "number": 2, "previous": "sha256:...", "changed": ["state"], "timestamp": "..." }
 }
 ```
+
+Vendor- or tool-specific facts that aren't (yet) canonical go in `extensions`
+under namespaced keys — see SPEC.md §3.8.
 
 A complete example lives at [examples/cr2032.twin.json](examples/cr2032.twin.json).
 Envelopes also render as JSON-LD (`save(..., jsonld=True)`) using the packaged

@@ -39,6 +39,8 @@
     "state_of_health": "bte:stateOfHealth",
     "cycle_count": "bte:cycleCount",
     "internal_resistance_ohm": "bte:internalResistanceOhm",
+    "energy_throughput_kwh": "bte:energyThroughputKilowattHour",
+    "equivalent_full_cycles": "bte:equivalentFullCycles",
     "method": "bte:estimationMethod",
     "source_data": {"@id": "bte:sourceData", "@type": "@id"},
 
@@ -52,6 +54,8 @@
     "created_by": "schema:creator",
     "tool": "bte:tool",
     "funding": "schema:funding",
+
+    "extensions": {"@id": "bte:extensions", "@type": "@json"},
 
     "version": "bte:version",
     "number": "bte:versionNumber",

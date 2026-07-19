@@ -4,6 +4,31 @@ All notable changes to this project are documented in this file.
 
 The format is based on Keep a Changelog and this project follows Semantic Versioning.
 
+## [Unreleased]
+
+### Added
+
+- BTE spec revision **0.1.1** (backward compatible): `state.energy_throughput_kwh`
+  and `state.equivalent_full_cycles` (SPEC §3.5); a top-level `extensions` object
+  for vendor/tool-specific facts (SPEC §3.8) with a single portable key grammar
+  (`^(?!(?:bte|schema|battinfo):)[a-z][a-z0-9_-]*:\S+(?![\s\S])`) enforced
+  identically by the JSON Schema and the pydantic model, reserved
+  `bte:`/`schema:`/`battinfo:` prefixes, no null values, and empty-object
+  omission from the canonical form; and the version-declaration rule
+  (SPEC §3.1), reported by `validate_dict` when a `0.1.0` document uses
+  `0.1.1` fields.
+- Canonical datetime form (SPEC §4): all datetimes serialize as RFC 3339 UTC
+  with `Z`, offsets normalized, fractional seconds without trailing zeros —
+  `load(save(env))` is a content-hash fixed point.
+- JSON-LD context terms `bte:energyThroughputKilowattHour`,
+  `bte:equivalentFullCycles`, `bte:extensions` (`@json`).
+
+### Changed
+
+- Envelope and all section models are now frozen (immutable after
+  construction), matching the spec's immutability language; `next_version()`
+  documents wholesale section replacement (no merging).
+
 ## [0.3.0] - 2026-07-08
 
 Renamed from `echoed` to **battwin**. The **Battery Twin Envelope (BTE)**

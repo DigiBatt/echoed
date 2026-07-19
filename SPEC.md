@@ -1,6 +1,6 @@
 # Battery Twin Envelope (BTE) Specification
 
-**Version:** 0.1.0 (draft)
+**Version:** 0.1.1 (draft)
 **Status:** Draft for community review
 **Editor:** Simon Clark
 **License:** Apache-2.0 (specification text and reference implementation)
@@ -58,10 +58,17 @@ JSON-LD rendering is defined in §6.
 | `state_history` | array | MAY | Prior state snapshots, oldest first. |
 | `data` | array | MAY | Links to datasets and feeds (§3.6). |
 | `provenance` | object | MUST | Creation metadata (§3.7). |
+| `extensions` | object | MAY | Namespaced vendor/tool-specific facts (§3.8). |
 | `version` | object | MUST | Version-chain record (§4). |
 
 Unknown top-level fields are invalid in v0.1 (forward compatibility is
-handled by `bte_version`).
+handled by `bte_version`); vendor- or tool-specific facts belong in
+`extensions` (§3.8).
+
+A document MUST declare a `bte_version` greater than or equal to the
+earliest specification version that defines every field it uses (e.g. a
+document using `extensions` or the §3.5 throughput fields MUST declare at
+least `0.1.1`).
 
 ### 3.2 `identity`
 
@@ -90,10 +97,12 @@ to execute them.
 ### 3.5 `state` / `state_history[]`
 
 A snapshot: `as_of` (ISO 8601, MUST); `state_of_charge` (0–1),
-`state_of_health` (0–1.5), `cycle_count`, `internal_resistance_ohm`, `method`
-(estimation method), `source_data` (URI of the dataset the estimate derives
-from) — all MAY. When a new snapshot replaces `state`, the old one SHOULD be
-appended to `state_history`.
+`state_of_health` (0–1.5), `cycle_count`, `internal_resistance_ohm`,
+`energy_throughput_kwh` (lifetime cumulative energy throughput, kWh, ≥ 0),
+`equivalent_full_cycles` (lifetime equivalent full cycles, ≥ 0, may be
+fractional), `method` (estimation method), `source_data` (URI of the dataset
+the estimate derives from) — all MAY. When a new snapshot replaces `state`,
+the old one SHOULD be appended to `state_history`.
 
 ### 3.6 `data[]`
 
@@ -104,6 +113,32 @@ SHOULD point at conforming BDF datasets (e.g. `*.bdf.csv`).
 ### 3.7 `provenance`
 
 `created` (ISO 8601, MUST); `created_by`, `tool`, `funding` (MAY).
+
+### 3.8 `extensions`
+
+A JSON object carrying vendor- or tool-specific facts that are not (yet)
+canonical, without forking the schema. Every key MUST match, in its
+entirety, the pattern
+
+```
+^(?!(?:bte|schema|battinfo):)[a-z][a-z0-9_-]*:\S+(?![\s\S])
+```
+
+i.e. `<prefix>:<name>` where the prefix matches `[a-z][a-z0-9_-]*` and the
+name is one or more non-whitespace characters (no spaces, tabs, carriage
+returns, or newlines anywhere in the key). Keys are case-sensitive. The
+prefixes `bte:`, `schema:`, and `battinfo:` — and any other prefix bound in
+the published JSON-LD context (§6) — are RESERVED and MUST NOT be used for
+extensions. Non-ASCII characters are permitted in the name but discouraged.
+Example: `"lab:fixture_id": "bench-07"`.
+
+Values are arbitrary JSON, but extension values MUST NOT be JSON null
+(absence is expressed by omitting the key). An empty `extensions` object
+MUST be omitted from the canonical form.
+
+Extensions participate in canonical serialization and content hashing (§4)
+exactly like every other field — there is no special-casing. Consumers MUST
+ignore extension entries they do not understand.
 
 ## 4. Versioning and immutability
 
@@ -118,7 +153,20 @@ document with:
 
 The content hash is `"sha256:" + hex(sha256(canonical_json))`, where
 `canonical_json` is the document serialized with sorted keys, separators
-`(",", ":")`, UTF-8, and all null-valued fields omitted. This yields a
+`(",", ":")`, UTF-8, and all null-valued fields omitted.
+
+In the canonical form, all datetime values (`state.as_of`,
+`provenance.created`, `version.timestamp`, and their `state_history`
+counterparts) MUST be RFC 3339 UTC with a `Z` suffix: timestamps carrying a
+non-UTC offset are converted to UTC, timestamps without an offset are
+interpreted as UTC, and fractional seconds are omitted when zero and
+otherwise carry no trailing zeros — `12:00:00Z`, `12:00:00.5Z`,
+`12:00:00.123456Z`.
+
+When issuing a new version, each updated top-level section REPLACES the
+previous section wholesale — there is no merging.
+
+This yields a
 verifiable hash chain: any consumer can check that a claimed successor really
 derives from its predecessor. (Implementations proved this pattern in
 production twin platforms; BTE standardizes the *shape*, not the platform.)
@@ -172,9 +220,20 @@ BTE v0.1 intentionally does **not** specify:
 
 See [`examples/cr2032.twin.json`](examples/cr2032.twin.json) for a complete
 envelope: a CR2032 cell with a BattINFO spec reference, an inline custom
-model stub, one state snapshot, and a BDF data link.
+model stub, one state snapshot, a BDF data link, and a small `extensions`
+block.
 
 ## 9. Acknowledgements
 
 Developed in continuity with the DigiBatt project, funded by the European
 Union under grant agreement 101103997.
+
+## Revision history
+
+- **0.1.0** — initial draft.
+- **0.1.1** — additive, backward compatible: `state.energy_throughput_kwh`
+  and `state.equivalent_full_cycles` (§3.5); top-level `extensions` object
+  with namespaced keys, reserved prefixes, and no null values (§3.8); the
+  version-declaration rule (§3.1); the canonical datetime form and
+  wholesale-replacement update semantics (§4). Documents declaring
+  `bte_version: "0.1.0"` remain valid so long as they use no 0.1.1 fields.

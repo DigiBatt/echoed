@@ -8,8 +8,10 @@ Two layers, matching the spec:
    implementation's stricter semantic checks (e.g. a model binding must have
    exactly one of ``source``/``inline``).
 
-``validate_dict``/``validate_file`` run both and return a flat list of
-human-readable problem strings (empty list = valid).
+``validate_dict``/``validate_file`` run both — plus the version-declaration
+rule of SPEC.md §3.1 (a document must declare a ``bte_version`` that defines
+every field it uses) — and return a flat list of human-readable problem
+strings (empty list = valid).
 """
 
 from __future__ import annotations
@@ -27,6 +29,9 @@ from .envelope import _JSONLD_KEYS
 
 SCHEMA_RESOURCE = "twin-envelope.schema.json"
 CONTEXT_RESOURCE = "twin-envelope.context.jsonld"
+
+#: StateSnapshot fields introduced by BTE 0.1.1 (SPEC.md §3.5).
+_STATE_FIELDS_0_1_1 = ("energy_throughput_kwh", "equivalent_full_cycles")
 
 
 @lru_cache(maxsize=1)
@@ -67,6 +72,34 @@ def validate_dict(doc: dict[str, Any]) -> list[str]:
     except ValueError as exc:
         problems.append(f"model: <root>: {exc}")
 
+    problems.extend(_version_declaration_problems(plain))
+
+    return problems
+
+
+def _version_declaration_problems(plain: dict[str, Any]) -> list[str]:
+    """SPEC.md §3.1: a document MUST declare a ``bte_version`` >= the earliest
+    specification version that defines every field it uses."""
+    if plain.get("bte_version") != "0.1.0":
+        return []
+    problems: list[str] = []
+    if "extensions" in plain:
+        problems.append(
+            "version: extensions: field requires bte_version >= 0.1.1 (document declares 0.1.0)"
+        )
+    snapshots: list[tuple[str, Any]] = [("state", plain.get("state"))]
+    history = plain.get("state_history")
+    if isinstance(history, list):
+        snapshots.extend((f"state_history/{i}", snap) for i, snap in enumerate(history))
+    for where, snapshot in snapshots:
+        if not isinstance(snapshot, dict):
+            continue
+        for field in _STATE_FIELDS_0_1_1:
+            if field in snapshot:
+                problems.append(
+                    f"version: {where}/{field}: field requires bte_version >= 0.1.1 "
+                    "(document declares 0.1.0)"
+                )
     return problems
 
 

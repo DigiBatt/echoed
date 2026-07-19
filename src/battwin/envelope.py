@@ -9,6 +9,7 @@ digital twin:
 - models          -> parameter sets (BPX/BattMo/...) with validity windows
 - state           -> estimated states (SoC/SoH/...) with provenance
 - data            -> links to time-series (BDF datasets, live feeds)
+- extensions      -> namespaced vendor/tool-specific facts (non-canonical)
 - version         -> immutable version chain (content-hash linked)
 
 The envelope deliberately references other resources by IRI/path instead of
@@ -21,20 +22,53 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from datetime import date, datetime, timezone
-from typing import Any, Literal, Optional
+from typing import Annotated, Any, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, model_validator
 
-BTE_VERSION = "0.1.0"
+BTE_VERSION = "0.1.1"
 
 _JSONLD_KEYS = ("@context", "@id", "@type")
 
+#: Extension keys MUST be namespaced as ``<prefix>:<name>`` (SPEC.md §3.8).
+#: This literal is byte-identical to the JSON Schema ``propertyNames`` pattern
+#: so both validation layers agree exactly, and it is written to behave the
+#: same under Python ``re.search``/``re.fullmatch`` and ECMA-262 regexes:
+#: ``(?![\s\S])`` emulates true end-of-input (unlike ``$``, which Python
+#: matches before a trailing newline), and ``\S+`` bans all whitespace in the
+#: name. The leading lookahead reserves every prefix bound in the packaged
+#: JSON-LD context (bte, schema, battinfo). Both lookaheads are redundant
+#: under ``fullmatch`` but keep the two pattern strings identical.
+_EXTENSION_KEY = re.compile(r"^(?!(?:bte|schema|battinfo):)[a-z][a-z0-9_-]*:\S+(?![\s\S])")
+
+
+def _rfc3339_utc(value: datetime) -> str:
+    """Canonical datetime form (SPEC.md §4).
+
+    RFC 3339 UTC with a ``Z`` suffix: non-UTC offsets are converted to UTC,
+    naive datetimes are interpreted as UTC, and fractional seconds are omitted
+    when zero and otherwise carry no trailing zeros (``12:00:00Z``,
+    ``12:00:00.5Z``, ``12:00:00.123456Z``).
+    """
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    value = value.astimezone(timezone.utc)
+    text = value.strftime("%Y-%m-%dT%H:%M:%S")
+    if value.microsecond:
+        text += "." + f"{value.microsecond:06d}".rstrip("0")
+    return text + "Z"
+
+
+#: Datetime that always serializes to the canonical RFC 3339 UTC 'Z' form.
+UTCDateTime = Annotated[datetime, PlainSerializer(_rfc3339_utc, return_type=str, when_used="json")]
+
 
 class _Section(BaseModel):
-    """Base for all envelope sections: strict keys, assignment validation."""
+    """Base for all envelope sections: strict keys, immutable after construction."""
 
-    model_config = ConfigDict(extra="forbid", validate_assignment=True)
+    model_config = ConfigDict(extra="forbid", frozen=True)
 
 
 class Identity(_Section):
@@ -110,11 +144,17 @@ class ModelBinding(_Section):
 class StateSnapshot(_Section):
     """An estimated state of the battery at a point in time."""
 
-    as_of: datetime
+    as_of: UTCDateTime
     state_of_charge: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     state_of_health: Optional[float] = Field(default=None, ge=0.0, le=1.5)
     cycle_count: Optional[int] = Field(default=None, ge=0)
     internal_resistance_ohm: Optional[float] = Field(default=None, ge=0)
+    energy_throughput_kwh: Optional[float] = Field(
+        default=None, ge=0, description="Lifetime cumulative energy throughput, in kWh."
+    )
+    equivalent_full_cycles: Optional[float] = Field(
+        default=None, ge=0, description="Lifetime equivalent full cycles (may be fractional)."
+    )
     method: Optional[str] = Field(
         default=None, description="How the state was estimated, e.g. 'coulomb_counting'."
     )
@@ -135,7 +175,7 @@ class DataLink(_Section):
 
 
 class Provenance(_Section):
-    created: datetime
+    created: UTCDateTime
     created_by: Optional[str] = None
     tool: Optional[str] = None
     funding: Optional[str] = None
@@ -149,11 +189,16 @@ class VersionInfo(_Section):
         default=None, description="sha256 content hash of the previous envelope version."
     )
     changed: list[str] = Field(default_factory=list)
-    timestamp: datetime
+    timestamp: UTCDateTime
 
 
 class TwinEnvelope(_Section):
-    """The top-level Battery Twin Envelope document."""
+    """The top-level Battery Twin Envelope document.
+
+    ``extensions`` carries namespaced, non-canonical facts (SPEC.md §3.8); it
+    participates in :meth:`canonical_json` and :meth:`content_hash` like every
+    other field.
+    """
 
     bte_version: str = BTE_VERSION
     id: str = Field(description="Stable identifier of the twin (URN or IRI).")
@@ -164,13 +209,45 @@ class TwinEnvelope(_Section):
     state_history: list[StateSnapshot] = Field(default_factory=list)
     data: list[DataLink] = Field(default_factory=list)
     provenance: Provenance
+    extensions: Optional[dict[str, Any]] = Field(
+        default=None,
+        description="Vendor/tool-specific facts that are not (yet) canonical. Keys MUST "
+        "be namespaced as '<prefix>:<name>' (SPEC.md §3.8); values are arbitrary "
+        "non-null JSON.",
+    )
     version: VersionInfo
+
+    @model_validator(mode="after")
+    def _extensions_well_formed(self) -> "TwinEnvelope":
+        if self.extensions:
+            bad = [key for key in self.extensions if not _EXTENSION_KEY.fullmatch(key)]
+            if bad:
+                raise ValueError(
+                    "extensions keys must be namespaced '<prefix>:<name>' (prefix matching "
+                    "[a-z][a-z0-9_-]*, name without whitespace; 'bte', 'schema', and "
+                    f"'battinfo' prefixes are reserved); invalid: {sorted(bad)}"
+                )
+            nulls = sorted(key for key, value in self.extensions.items() if value is None)
+            if nulls:
+                raise ValueError(
+                    "extension values must not be JSON null (express absence by omitting "
+                    f"the key); null-valued: {nulls}"
+                )
+        return self
 
     # -- serialization ----------------------------------------------------
 
     def to_dict(self) -> dict[str, Any]:
-        """Plain-JSON dict with None-valued fields omitted."""
-        return self.model_dump(mode="json", exclude_none=True)
+        """Plain-JSON dict with None-valued fields omitted.
+
+        An empty ``extensions`` object is omitted from the canonical form
+        (SPEC.md §3.8), so ``extensions=None`` and ``extensions={}`` hash
+        identically.
+        """
+        doc = self.model_dump(mode="json", exclude_none=True)
+        if doc.get("extensions") == {}:
+            del doc["extensions"]
+        return doc
 
     def canonical_json(self) -> str:
         """Deterministic serialization used for content hashing."""
@@ -201,8 +278,9 @@ class TwinEnvelope(_Section):
         Envelopes are immutable: this copies the document, applies the given
         top-level section updates (e.g. ``state=...``, ``data=[...]``), bumps
         the version number, and links back to this version by content hash.
-        If a new ``state`` is provided, the old one is appended to
-        ``state_history`` automatically.
+        Each updated section REPLACES the previous one wholesale — no merging
+        is performed. If a new ``state`` is provided, the old one is appended
+        to ``state_history`` automatically.
         """
         unknown = set(updates) - set(type(self).model_fields)
         if unknown:

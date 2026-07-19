@@ -16,6 +16,12 @@
     "state_history": {"type": "array", "items": {"$ref": "#/$defs/stateSnapshot"}},
     "data": {"type": "array", "items": {"$ref": "#/$defs/dataLink"}},
     "provenance": {"$ref": "#/$defs/provenance"},
+    "extensions": {
+      "type": "object",
+      "description": "Vendor/tool-specific facts that are not (yet) canonical. Keys MUST be namespaced as '<prefix>:<name>' ('bte', 'schema', and 'battinfo' prefixes are reserved); values are arbitrary non-null JSON.",
+      "propertyNames": {"pattern": "^(?!(?:bte|schema|battinfo):)[a-z][a-z0-9_-]*:\\S+(?![\\s\\S])"},
+      "additionalProperties": {"not": {"type": "null"}}
+    },
     "version": {"$ref": "#/$defs/versionInfo"}
   },
   "$defs": {
@@ -84,6 +90,8 @@
         "state_of_health": {"type": "number", "minimum": 0, "maximum": 1.5},
         "cycle_count": {"type": "integer", "minimum": 0},
         "internal_resistance_ohm": {"type": "number", "minimum": 0},
+        "energy_throughput_kwh": {"type": "number", "minimum": 0},
+        "equivalent_full_cycles": {"type": "number", "minimum": 0},
         "method": {"type": "string"},
         "source_data": {"type": "string"}
       }
