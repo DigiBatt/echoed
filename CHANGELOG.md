@@ -6,6 +6,8 @@ The format is based on Keep a Changelog and this project follows Semantic Versio
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-07-20
+
 ### Added
 
 - BTE spec revision **0.1.1** (backward compatible): `state.energy_throughput_kwh`
@@ -82,6 +84,9 @@ protocol design lives on in the `gleaned` collector package.
 - Two-layer validation (`echoed.validate`): JSON Schema + model rules.
 - `echoed` CLI: `init`, `validate`, `show`, `hash`, `diff`.
 - Worked example: `examples/cr2032.twin.json`.
+- Baseline repository governance files (`CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`,
+  `SECURITY.md`).
+- CI workflow for linting, type-checking, and tests.
 
 ### Changed
 
@@ -93,10 +98,3 @@ protocol design lives on in the `gleaned` collector package.
 
 - `DigitalTwin`, harvester protocols (moved to `gleaned`), BDF ingestion
   helper (superseded by `batterydf`), and all placeholder subpackages.
-
-## [Unreleased]
-
-### Added
-
-- Baseline repository governance files (`CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`).
-- CI workflow for linting, type-checking, and tests.

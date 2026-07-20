@@ -50,7 +50,7 @@
   "provenance": {
     "created": "2026-07-07T12:00:00Z",
     "created_by": "Simon Clark",
-    "tool": "battwin/0.3.0",
+    "tool": "battwin/0.4.0",
     "funding": "EU grant agreement 101103997 (DigiBatt)"
   },
   "extensions": {

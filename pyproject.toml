@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "battwin"
-version = "0.3.0"
+version = "0.4.0"
 description = "Battery Twin Envelope (BTE): an open specification and reference SDK for expressing and exchanging battery digital twins"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.10"

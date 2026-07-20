@@ -370,4 +370,4 @@ def _version() -> str:
 
         return version("battwin")
     except Exception:  # pragma: no cover - metadata absent in odd environments
-        return "0.3.0"
+        return "0.4.0"
